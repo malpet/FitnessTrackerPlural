@@ -1,0 +1,99 @@
+Maven dependencies:
+	<dependency>
+  	<groupId>org.springframework.security</groupId>
+  	<artifactId>spring-security-web</artifactId>
+  	<version>3.2.0.RELEASE</version>
+  </dependency>
+  <dependency>
+  	<groupId>org.springframework.security</groupId>
+  	<artifactId>spring-security-config</artifactId>
+  	<version>3.2.0.RELEASE</version>
+  </dependency>
+  <dependency>
+  	<groupId>commons-logging</groupId>
+  	<artifactId>commons-logging</artifactId>
+  	<version>1.1.1</version>
+  </dependency>
+
+For the Spring security is necessary to define following in the web.xml:
+	ContextLoaderListener
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	
+	ConfigLocation
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>/WEB-INF/config/security-config.xml</param-value>
+	</context-param>
+	
+	ApplicationEntryPoint
+	<filter>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+	
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+Minimal security in security-config.xml
+	<http auto-config="true">
+		<intercept-url pattern="/**" access="ROLE_USER" />
+	</http>
+	
+	<authentication-manager>
+		<authentication-provider>
+			<user-service>
+				<user name="peter" password="secret" authorities="ROLE_USER"/>
+			</user-service>
+		</authentication-provider>
+	</authentication-manager>
+	
+
+Creating database tables:
+	create table users(username varchar(50) not null primary key,
+		password varchar(50) not null,
+        enabled boolean not null);
+        
+	create table authorities(
+		username varchar(50) not null,
+        authority varchar(50) not null,
+        constraint fk_authorities_users
+        foreign key(username) references users(username));
+	create unique index ix_auth_username on authorities (username, authority);
+
+	insert into users(username, password, enabled) 
+		values ("peter","secret",true)
+	select * from users;
+
+	insert into authorities(username, authority) values ("peter", "ROLE_USER");
+		select * from authorities;
+	
+	<dependency>
+		<groupId>mysql</groupId>
+		<artifactId>mysql-connector-java</artifactId>
+		<version>5.1.6</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-jdbc</artifactId>
+		<version>3.2.6.RELEASE</version>
+	</dependency>
+	
+Security configuration for JDBC connection:
+	<authentication-manager>
+		<authentication-provider user-service-ref="userDetailsService" /> 
+	</authentication-manager>
+	
+	<beans:bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<beans:property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<beans:property name="url" value="jdbc:myslq://localhost:3306/fitnessTracker" />
+		<beans:property name="username" value="root" />
+		<beans:property name="password" value="mambmcmd" />
+	</beans:bean>
+	
+	<beans:bean id="userDetailsService" class="org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl">
+		<beans:property name="dataSource" ref="dataSource" />
+	</beans:bean>
