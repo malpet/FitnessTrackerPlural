@@ -97,3 +97,5 @@ Security configuration for JDBC connection:
 	<beans:bean id="userDetailsService" class="org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl">
 		<beans:property name="dataSource" ref="dataSource" />
 	</beans:bean>
+
+More:
