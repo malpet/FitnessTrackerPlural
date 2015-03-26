@@ -98,4 +98,4 @@ Security configuration for JDBC connection:
 		<beans:property name="dataSource" ref="dataSource" />
 	</beans:bean>
 
-More:
+More about:
